@@ -1,0 +1,22 @@
+function [p0, p1, p2] = simulator3(K, b)
+global P D1 A B C D;
+P = K;
+D1 = b*P;
+%Delay3 = delay;
+y = 0;
+e = 0;
+[A, B, C, D] = tf2ss(1000, [1 1 0]);
+sim('../../controller3.mdl');
+ov = stepinfo(y,t);
+Kp = 1000;
+a1 = Kp*Kp;
+b1 = K*K;
+c1 = a1*b1;
+eta = sqrt(1+2*c1*(0.5*c1+2*b*b-1));
+omega = -0.5 + c1/2 + 0.5*sqrt(1-2*c1 + 4*c1*b*b + c1*c1);
+arg1 = -0.5*(b-1)*(c1-1+eta);
+arg2 =  -sqrt(c1-1+eta)*(c1+2*b-1+eta)/(2*sqrt(2));
+phi = atan2(arg2, arg1) + pi;
+p0 = omega/phi;
+p1 = ov.Peak;
+p2 = trapz(e.*e);
